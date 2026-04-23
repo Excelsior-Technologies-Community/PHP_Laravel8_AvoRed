@@ -1,3 +1,4 @@
+
 # PHP_Laravel8_AvoRed
 
 ## Introduction
@@ -335,4 +336,7 @@ PHP_Laravel8_AvoRed
 
 Your PHP_Laravel8_AvoRed Project is now ready!
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> development
