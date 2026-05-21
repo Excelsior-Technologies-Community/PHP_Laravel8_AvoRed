@@ -3,20 +3,21 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Product;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 
 class ProductController extends Controller
 {
-    // INDEX (LIST + SEARCH)
+    /**
+     * Display a listing of the products.
+     */
     public function index(Request $request)
     {
-        $query = DB::table('avored_products')
-            ->whereNull('deleted_at'); // 🔥 important
+        $query = Product::query();
 
         if ($request->search) {
             $query->where('name', 'like', '%' . $request->search . '%')
-                ->orWhere('id', 'like', '%' . $request->search . '%');
+                  ->orWhere('id', 'like', '%' . $request->search . '%');
         }
 
         $products = $query->orderBy('id', 'asc')->paginate(5);
@@ -24,34 +25,46 @@ class ProductController extends Controller
         return view('products.index', compact('products'));
     }
 
-    // DELETE (SOFT DELETE)
+    /**
+     * Soft delete a product.
+     */
     public function delete($id)
     {
-        DB::table('avored_products')
-            ->where('id', $id)
-            ->update(['deleted_at' => now()]);
+        $product = Product::findOrFail($id);
+        $product->delete();
 
         return redirect()->back()->with('success', 'Product moved to trash successfully!');
     }
 
-    // TRASH PAGE
+    /**
+     * Display the trash page.
+     */
     public function trash()
     {
-        $products = DB::table('avored_products')
-            ->whereNotNull('deleted_at')
-            ->orderBy('id', 'desc')
-            ->paginate(10);
+        $products = Product::onlyTrashed()->orderBy('id', 'desc')->paginate(10);
 
         return view('products.trash', compact('products'));
     }
 
-    // RESTORE
+    /**
+     * Restore a soft-deleted product.
+     */
     public function restore($id)
     {
-        DB::table('avored_products')
-            ->where('id', $id)
-            ->update(['deleted_at' => null]);
+        $product = Product::onlyTrashed()->findOrFail($id);
+        $product->restore();
 
         return redirect()->back()->with('success', 'Product restored successfully!');
+    }
+
+    /**
+     * Permanently delete a product.
+     */
+    public function forceDelete($id)
+    {
+        $product = Product::onlyTrashed()->findOrFail($id);
+        $product->forceDelete();
+
+        return redirect()->back()->with('success', 'Product permanently deleted!');
     }
 }

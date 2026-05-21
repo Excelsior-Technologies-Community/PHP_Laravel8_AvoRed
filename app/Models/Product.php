@@ -7,11 +7,15 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Product extends Model
 {
-    use SoftDeletes;
+    use SoftDeletes; 
 
     protected $table = 'avored_products';
 
     protected $fillable = [
-        'name'
+        'name',
+        'slug',
+        'price',
+        'sku',
+        'description' 
     ];
 }
